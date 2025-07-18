@@ -11,7 +11,7 @@ public class SampleController {
 
     @GetMapping(produces = "application/json")
     public String getSample() {
-        return "This is a sample response from the Daraja API";
+        return "This is a test response from the Daraja API";
     }
 
 }
