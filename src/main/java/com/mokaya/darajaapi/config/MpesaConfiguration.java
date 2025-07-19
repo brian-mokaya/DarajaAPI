@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class MpesaConfiguration {
     private String consumerKey;
     private String consumerSecret;
-    private String oauthUrl;
+    private String oauthEndpoint;
     private String grantType;
 
     @Override
@@ -19,7 +19,7 @@ public class MpesaConfiguration {
         return "MpesaConfiguration{" +
                 "consumerKey='" + consumerKey + '\'' +
                 ", consumerSecret='" + consumerSecret + '\'' +
-                ", oauthUrl='" + oauthUrl + '\'' +
+                ", oauthUrl='" + oauthEndpoint + '\'' +
                 ", grantType='" + grantType + '\'' +
                 '}';
     }
