@@ -1,5 +1,9 @@
 package com.mokaya.darajaapi.constants;
 
+import com.squareup.okhttp.MediaType;
+
+import java.awt.*;
+
 public class Constants {
     public static final String BASIC_AUTH_STRING = "Basic ";
     public static final String AUTHORIZATION_HEADER_STRING = "Authorization";
@@ -11,4 +15,5 @@ public class Constants {
     public static final String ACCEPT_VALUE = "application/json";
     public static final String CONTENT_TYPE_HEADER = "Content-Type";
     public static final String CONTENT_TYPE_VALUE = "application/json";
+    public static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
 }

@@ -6,12 +6,17 @@ import static com.mokaya.darajaapi.constants.Constants.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokaya.darajaapi.config.MpesaConfiguration;
 import com.mokaya.darajaapi.dto.AccessTokenResponse;
+import com.mokaya.darajaapi.dto.RegisterUrlRequest;
+import com.mokaya.darajaapi.dto.RegisterUrlResponse;
 import com.mokaya.darajaapi.utils.HelperUtility;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 
 @Service
@@ -75,7 +80,41 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
             
             log.error("Error while fetching access token: {}", e.getMessage());
             throw new RuntimeException("Failed to fetch access token", e);
-
         }
+    }
+
+    @Override
+    public RegisterUrlResponse registerUrl() {
+        AccessTokenResponse accessTokenResponse = getAccessToken();
+
+        RegisterUrlRequest registerUrlRequest= new RegisterUrlRequest();
+        registerUrlRequest.setConfirmationUrl(mpesaConfiguration.getConfirmationUrl());
+        registerUrlRequest.setShortCode(mpesaConfiguration.getShortCode());
+        registerUrlRequest.setValidationUrl(mpesaConfiguration.getValidationUrl());
+        registerUrlRequest.setResponseType(mpesaConfiguration.getResponseType());
+
+        RequestBody requestBody = RequestBody.create(JSON_MEDIA_TYPE,HelperUtility.toJson(registerUrlRequest));
+
+        Request request = new Request.Builder()
+                .url(mpesaConfiguration.getRegisterUrlEndpoint())
+                .post(requestBody)
+                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s%s", BASIC_AUTH_STRING, accessTokenResponse.getAccessToken()))
+                .addHeader(CACHE_CONTROL_HEADER, CACHE_CONTROL_HEADER_VALUE)
+                .addHeader(USER_AGENT_HEADER, USER_AGENT_VALUE)
+                .addHeader(ACCEPT_HEADER, ACCEPT_VALUE)
+                .addHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE_VALUE)
+                .build();
+
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+            assert response.body() != null;
+            String responseBody = response.body().string();
+            return objectMapper.readValue(responseBody, RegisterUrlResponse.class);
+        } catch (IOException e) {
+            log.error("Error while registering URL: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+
     }
 }
