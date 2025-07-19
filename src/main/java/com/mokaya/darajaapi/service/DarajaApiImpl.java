@@ -42,17 +42,37 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
         Request request = new Request.Builder()
                 .url(String.format(mpesaConfiguration.getOauthEndpoint(), mpesaConfiguration.getGrantType()))
                 .get()
-                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s %s", BASIC_AUTH_STRING, encodedCredentials))
+                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s%s", BASIC_AUTH_STRING, encodedCredentials))
                 .addHeader(CACHE_CONTROL_HEADER, CACHE_CONTROL_HEADER_VALUE)
+                .addHeader(USER_AGENT_HEADER, USER_AGENT_VALUE)
+                .addHeader(ACCEPT_HEADER, ACCEPT_VALUE)
+                .addHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE_VALUE)
                 .build();
 
         try {
             Response response = okHttpClient.newCall(request).execute();
             String responseBody = response.body().string();
 
+            if (!response.isSuccessful()) {
+                log.error("Error response from API: {}", responseBody);
+                
+                // Check if the response contains Incapsula WAF block indicators
+                if (responseBody.contains("Incapsula") || responseBody.contains("_Incapsula_Resource")) {
+                    log.error("Request blocked by Incapsula WAF. Please check your request headers and try again.");
+                    throw new RuntimeException("Failed to fetch access token - Request blocked by security measures. Please try again later.");
+                }
+                
+                throw new RuntimeException("Failed to fetch access token - API returned error: " + responseBody);
+            }
 
             return objectMapper.readValue(responseBody, AccessTokenResponse.class);
         } catch (Exception e) {
+            // Check if the exception message contains Incapsula indicators
+            if (e.getMessage() != null && (e.getMessage().contains("Incapsula") || e.getMessage().contains("_Incapsula_Resource"))) {
+                log.error("Request likely blocked by Incapsula WAF: {}", e.getMessage());
+                throw new RuntimeException("Failed to fetch access token - Request blocked by security measures. Please try again later.", e);
+            }
+            
             log.error("Error while fetching access token: {}", e.getMessage());
             throw new RuntimeException("Failed to fetch access token", e);
 

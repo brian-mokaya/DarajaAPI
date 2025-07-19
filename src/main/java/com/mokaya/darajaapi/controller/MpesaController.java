@@ -18,7 +18,7 @@ public class MpesaController {
         this.darajaApi = darajaApi;
     }
 
-    @GetMapping(path = "/token", produces = "application/json")
+    @GetMapping(path = "/token")
     public ResponseEntity<AccessTokenResponse> getAccessToken() {
         return ResponseEntity.ok(darajaApi.getAccessToken());
     }
