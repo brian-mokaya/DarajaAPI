@@ -18,6 +18,7 @@ public class MpesaConfiguration {
     private String validationUrl;
     private String confirmationUrl;
     private String registerUrlEndpoint;
+    private String simulateTransactionEndpoint;
 
     @Override
     public String toString() {

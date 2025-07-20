@@ -1,6 +1,5 @@
 package com.mokaya.darajaapi.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -8,15 +7,15 @@ import lombok.Data;
 
 //@JsonIgnoreProperties(ignoreUnknown = true)
 public class RegisterUrlRequest {
-    @JsonProperty("shortCode")
+    @JsonProperty("ShortCode")
     private String shortCode;
 
-    @JsonProperty("responseType")
+    @JsonProperty("ResponseType")
     private String responseType;
 
-    @JsonProperty("confirmationURL")
+    @JsonProperty("ConfirmationURL")
     private String confirmationUrl;
 
-    @JsonProperty("validationURL")
+    @JsonProperty("ValidationURL")
     private String validationUrl;
 }

@@ -5,9 +5,7 @@ import static com.mokaya.darajaapi.constants.Constants.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokaya.darajaapi.config.MpesaConfiguration;
-import com.mokaya.darajaapi.dto.AccessTokenResponse;
-import com.mokaya.darajaapi.dto.RegisterUrlRequest;
-import com.mokaya.darajaapi.dto.RegisterUrlResponse;
+import com.mokaya.darajaapi.dto.*;
 import com.mokaya.darajaapi.utils.HelperUtility;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -60,13 +58,13 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
 
             if (!response.isSuccessful()) {
                 log.error("Error response from API: {}", responseBody);
-                
+
                 // Check if the response contains Incapsula WAF block indicators
                 if (responseBody.contains("Incapsula") || responseBody.contains("_Incapsula_Resource")) {
                     log.error("Request blocked by Incapsula WAF. Please check your request headers and try again.");
                     throw new RuntimeException("Failed to fetch access token - Request blocked by security measures. Please try again later.");
                 }
-                
+
                 throw new RuntimeException("Failed to fetch access token - API returned error: " + responseBody);
             }
 
@@ -98,7 +96,7 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
         Request request = new Request.Builder()
                 .url(mpesaConfiguration.getRegisterUrlEndpoint())
                 .post(requestBody)
-                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s%s", BASIC_AUTH_STRING, accessTokenResponse.getAccessToken()))
+                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s%s", BEARER_AUTH_STRING, accessTokenResponse.getAccessToken()))
                 .addHeader(CACHE_CONTROL_HEADER, CACHE_CONTROL_HEADER_VALUE)
                 .addHeader(USER_AGENT_HEADER, USER_AGENT_VALUE)
                 .addHeader(ACCEPT_HEADER, ACCEPT_VALUE)
@@ -116,5 +114,32 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
         }
 
 
+    }
+
+    @Override
+    public SimulateC2BResponse simulateC2BTransaction(SimulateC2BRequest simulateC2BRequest) {
+        AccessTokenResponse accessTokenResponse = getAccessToken();
+
+        RequestBody requestBody = RequestBody.create(JSON_MEDIA_TYPE, HelperUtility.toJson(simulateC2BRequest));
+
+        Request request = new Request.Builder()
+                .url(mpesaConfiguration.getSimulateTransactionEndpoint())
+                .post(requestBody)
+                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s%s", BEARER_AUTH_STRING, accessTokenResponse.getAccessToken()))
+                .addHeader(CACHE_CONTROL_HEADER, CACHE_CONTROL_HEADER_VALUE)
+                .addHeader(USER_AGENT_HEADER, USER_AGENT_VALUE)
+                .addHeader(ACCEPT_HEADER, ACCEPT_VALUE)
+                .addHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE_VALUE)
+                .build();
+
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+            assert response.body() != null;
+            String responseBody = response.body().string();
+            return objectMapper.readValue(responseBody, SimulateC2BResponse.class);
+        } catch (IOException e) {
+            log.error("Error while simulating C2B transaction: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 }

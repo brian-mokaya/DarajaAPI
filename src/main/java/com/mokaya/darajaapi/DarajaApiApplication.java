@@ -1,6 +1,7 @@
 package com.mokaya.darajaapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mokaya.darajaapi.dto.AcknowledgeResponse;
 import com.squareup.okhttp.OkHttpClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -24,6 +25,13 @@ public class DarajaApiApplication {
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
+    }
+
+    @Bean
+    public AcknowledgeResponse acknowledgeResponse() {
+        AcknowledgeResponse acknowledgeResponse = new AcknowledgeResponse();
+        acknowledgeResponse.setMessage("Success");
+        return acknowledgeResponse;
     }
 
 }
