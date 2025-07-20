@@ -60,13 +60,13 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
 
             if (!response.isSuccessful()) {
                 log.error("Error response from API: {}", responseBody);
-                
+
                 // Check if the response contains Incapsula WAF block indicators
                 if (responseBody.contains("Incapsula") || responseBody.contains("_Incapsula_Resource")) {
                     log.error("Request blocked by Incapsula WAF. Please check your request headers and try again.");
                     throw new RuntimeException("Failed to fetch access token - Request blocked by security measures. Please try again later.");
                 }
-                
+
                 throw new RuntimeException("Failed to fetch access token - API returned error: " + responseBody);
             }
 
@@ -98,7 +98,7 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
         Request request = new Request.Builder()
                 .url(mpesaConfiguration.getRegisterUrlEndpoint())
                 .post(requestBody)
-                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s%s", BASIC_AUTH_STRING, accessTokenResponse.getAccessToken()))
+                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s%s", BEARER_AUTH_STRING, accessTokenResponse.getAccessToken()))
                 .addHeader(CACHE_CONTROL_HEADER, CACHE_CONTROL_HEADER_VALUE)
                 .addHeader(USER_AGENT_HEADER, USER_AGENT_VALUE)
                 .addHeader(ACCEPT_HEADER, ACCEPT_VALUE)

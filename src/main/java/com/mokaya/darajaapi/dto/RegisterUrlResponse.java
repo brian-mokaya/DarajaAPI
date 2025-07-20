@@ -1,12 +1,15 @@
 package com.mokaya.darajaapi.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class RegisterUrlResponse {
+
+    @JsonProperty("requestId")
+    private String requestId;
+    
     @JsonProperty("conversationId")
     private String conversationId;
 
@@ -15,4 +18,10 @@ public class RegisterUrlResponse {
 
     @JsonProperty("OriginatorConversationID")
     private String originatorConversationId;
+    
+    @JsonProperty("errorCode")
+    private String errorCode;
+    
+    @JsonProperty("errorMessage")
+    private String errorMessage;
 }
