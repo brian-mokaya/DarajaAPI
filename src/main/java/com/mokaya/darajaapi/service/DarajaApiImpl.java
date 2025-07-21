@@ -143,4 +143,55 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
             throw new RuntimeException(e);
         }
     }
-}
+
+    @Override
+    public B2CTransactionSyncResponse performB2CTransaction(InternalB2CTransactionRequest internalB2CTransactionRequest) {
+
+    AccessTokenResponse accessTokenResponse = getAccessToken();
+    log.info(String.format("Access Token: %s", accessTokenResponse.getAccessToken()));
+
+    B2CTransactionRequest b2CTransactionRequest = new B2CTransactionRequest();
+
+    b2CTransactionRequest.setAmount(internalB2CTransactionRequest.getAmount());
+    b2CTransactionRequest.setPartyB(internalB2CTransactionRequest.getPartyB());
+    b2CTransactionRequest.setCommandId(internalB2CTransactionRequest.getCommandID());
+    b2CTransactionRequest.setRemarks(internalB2CTransactionRequest.getRemarks());
+    b2CTransactionRequest.setOccasion(internalB2CTransactionRequest.getOccassion());
+
+    // get the Security credentials
+    b2CTransactionRequest.setSecurityCredential(HelperUtility.getSecurityCredentials(mpesaConfiguration.getB2cInitiatorPassword()));
+
+    log.info("Security Creds: {}", b2CTransactionRequest.getSecurityCredential());
+
+    // set the result url ...
+        b2CTransactionRequest.setResultURL(mpesaConfiguration.getB2cResultUrl());
+        b2CTransactionRequest.setQueueTimeOutURL(mpesaConfiguration.getB2cQueueTimeoutUrl());
+        b2CTransactionRequest.setInitiatorName(mpesaConfiguration.getB2cInitiatorName());
+        b2CTransactionRequest.setPartyA(mpesaConfiguration.getShortCode());
+
+
+        RequestBody body = RequestBody.create(JSON_MEDIA_TYPE, Objects.requireNonNull(HelperUtility.toJson(b2CTransactionRequest)));
+
+        Request request = new Request.Builder()
+                .url(mpesaConfiguration.getB2cTransactionEndpoint())
+                .post(body)
+                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s%s", BEARER_AUTH_STRING, accessTokenResponse.getAccessToken()))
+                .addHeader(CACHE_CONTROL_HEADER, CACHE_CONTROL_HEADER_VALUE)
+                .addHeader(USER_AGENT_HEADER, USER_AGENT_VALUE)
+                .addHeader(ACCEPT_HEADER, ACCEPT_VALUE)
+                .addHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE_VALUE)
+                .build();
+
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+
+            assert response.body() != null;
+
+            return objectMapper.readValue(response.body().string(), B2CTransactionSyncResponse.class);
+        } catch (IOException e) {
+            log.error("Could not perform B2C transaction ->{}", e.getLocalizedMessage());
+            return null;
+        }
+
+    }
+    }

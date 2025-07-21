@@ -20,4 +20,5 @@ public class InternalB2CTransactionRequest{
 
     @JsonProperty("PartyB")
     private String partyB;
+
 }

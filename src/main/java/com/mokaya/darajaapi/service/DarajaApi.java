@@ -1,9 +1,6 @@
 package com.mokaya.darajaapi.service;
 
-import com.mokaya.darajaapi.dto.AccessTokenResponse;
-import com.mokaya.darajaapi.dto.RegisterUrlResponse;
-import com.mokaya.darajaapi.dto.SimulateC2BRequest;
-import com.mokaya.darajaapi.dto.SimulateC2BResponse;
+import com.mokaya.darajaapi.dto.*;
 
 public interface DarajaApi {
 
@@ -32,4 +29,11 @@ public interface DarajaApi {
     SimulateC2BResponse simulateC2BTransaction(SimulateC2BRequest simulateC2BRequest);
 
 
+    /**
+     * Performs a B2C transaction.
+     *
+     * @param internalB2CTransactionRequest The request object containing details for the B2C transaction.
+     * @return B2CTransactionSyncResponse containing the result of the B2C transaction.
+     */
+    B2CTransactionSyncResponse performB2CTransaction(InternalB2CTransactionRequest internalB2CTransactionRequest);
 }

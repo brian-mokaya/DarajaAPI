@@ -1,7 +1,9 @@
 package com.mokaya.darajaapi.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
+@Data
 public class Result{
 
 	@JsonProperty("ConversationID")
@@ -21,6 +23,9 @@ public class Result{
 
 	@JsonProperty("ResultCode")
 	private int resultCode;
+
+	@JsonProperty("ResultParameters")
+	private ResultParameters resultParameters;
 
 	@JsonProperty("TransactionID")
 	private String transactionID;

@@ -1,15 +1,19 @@
 package com.mokaya.darajaapi.controller;
 
 
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokaya.darajaapi.dto.*;
 import com.mokaya.darajaapi.service.DarajaApiImpl;
+import jakarta.websocket.Endpoint;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("mobile-money")
 public class MpesaController {
@@ -56,6 +60,34 @@ public class MpesaController {
         return ResponseEntity.ok(darajaApi.simulateC2BTransaction(simulateC2BRequest));
     }
 
+
+    // === B2C Transaction Region ====
+
+    @GetMapping(path = "/b2c-transaction-result", produces = "application/json")
+    public ResponseEntity<AcknowledgeResponse> b2cTransactionAsyncResults(@RequestBody B2CTransactionAsyncResponse b2CTransactionAsyncResponse) {
+        System.out.println("B2C Transaction Async Results: " + b2CTransactionAsyncResponse);
+
+        log.info("============ B2C Transaction Response =============");
+        try {
+            log.info(objectMapper.writeValueAsString(b2CTransactionAsyncResponse));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ResponseEntity.ok(acknowledgeResponse);
+
+    }
+
+
+    @PostMapping(path = "/b2c-queue-timeout", produces = "application/json")
+    public ResponseEntity<AcknowledgeResponse> queueTimeout(@RequestBody Object object) {
+        return ResponseEntity.ok(acknowledgeResponse);
+    }
+
+    @PostMapping(path = "/b2c-transaction", produces = "application/json")
+    public ResponseEntity<B2CTransactionSyncResponse> performB2CTransaction(@RequestBody InternalB2CTransactionRequest internalB2CTransactionRequest) {
+        return ResponseEntity.ok(darajaApi.performB2CTransaction(internalB2CTransactionRequest));
+    }
 
 
 }
