@@ -1,13 +1,19 @@
 package com.mokaya.darajaapi.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mongodb.internal.IgnorableRequestContext;
 import lombok.Data;
 
 @Data
+//    @JsonIgnoreProperties(ignoreUnknown = true)
 public class TransactionResults {
+
 
     @JsonProperty("TransactionType")
     private String transactionType;
+
+    @JsonProperty("CommandID")
+    private String commandID;
 
     @JsonProperty("TransID")
     private String transID;
@@ -15,10 +21,10 @@ public class TransactionResults {
     @JsonProperty("TransTime")
     private String transTime;
 
-    @JsonProperty("TransAmount")
+    @JsonProperty("Amount")
     private String transAmount;
 
-    @JsonProperty("BusinessShortCode")
+    @JsonProperty("ShortCode")
     private String businessShortCode;
 
     @JsonProperty("BillRefNumber")
@@ -33,7 +39,7 @@ public class TransactionResults {
     @JsonProperty("ThirdPartyTransID")
     private String thirdPartyTransID;
 
-    @JsonProperty("MSISDN")
+    @JsonProperty("Msisdn")
     private String msisdn;
 
     @JsonProperty("FirstName")
@@ -44,4 +50,5 @@ public class TransactionResults {
 
     @JsonProperty("LastName")
     private String lastName;
+
 }

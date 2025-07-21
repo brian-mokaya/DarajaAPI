@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Objects;
 
 
 @Service
@@ -120,7 +121,7 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
     public SimulateC2BResponse simulateC2BTransaction(SimulateC2BRequest simulateC2BRequest) {
         AccessTokenResponse accessTokenResponse = getAccessToken();
 
-        RequestBody requestBody = RequestBody.create(JSON_MEDIA_TYPE, HelperUtility.toJson(simulateC2BRequest));
+        RequestBody requestBody = RequestBody.create(JSON_MEDIA_TYPE, Objects.requireNonNull(HelperUtility.toJson(simulateC2BRequest)));
 
         Request request = new Request.Builder()
                 .url(mpesaConfiguration.getSimulateTransactionEndpoint())

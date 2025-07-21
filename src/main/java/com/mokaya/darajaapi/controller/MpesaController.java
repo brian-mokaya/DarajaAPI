@@ -1,8 +1,12 @@
 package com.mokaya.darajaapi.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokaya.darajaapi.dto.*;
 import com.mokaya.darajaapi.service.DarajaApiImpl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +16,7 @@ public class MpesaController {
 
     private final DarajaApiImpl darajaApi;
     private final AcknowledgeResponse acknowledgeResponse;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public MpesaController(DarajaApiImpl darajaApi, AcknowledgeResponse acknowledgeResponse) {
         this.darajaApi = darajaApi;
@@ -29,11 +34,21 @@ public class MpesaController {
         return ResponseEntity.ok(darajaApi.registerUrl());
     }
 
-    @PostMapping(path = "/validate-transaction", produces = "application/json")
-    public ResponseEntity<AcknowledgeResponse> validateTransaction(@RequestBody TransactionResults transactionResults) {
-        System.out.println("✅ Transaction received: " + transactionResults);
+    @PostMapping(path = "/validation", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE }, produces = "application/json")
+    public ResponseEntity<AcknowledgeResponse> validateTransaction(@RequestBody String rawBody) {
+        System.out.println("✅ Raw transaction received: " + rawBody);
+
+        try {
+            TransactionResults transaction = objectMapper.readValue(rawBody, TransactionResults.class);
+            System.out.println("✅ Parsed Transaction: " + transaction);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
         return ResponseEntity.ok(acknowledgeResponse);
     }
+
 
     @PostMapping(path = "/simulate-transaction", produces = "application/json")
     public ResponseEntity<SimulateC2BResponse> simulateC2BTransaction(@RequestBody SimulateC2BRequest simulateC2BRequest) {
