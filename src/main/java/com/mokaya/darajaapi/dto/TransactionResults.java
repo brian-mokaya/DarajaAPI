@@ -5,9 +5,7 @@ import com.mongodb.internal.IgnorableRequestContext;
 import lombok.Data;
 
 @Data
-//    @JsonIgnoreProperties(ignoreUnknown = true)
 public class TransactionResults {
-
 
     @JsonProperty("TransactionType")
     private String transactionType;

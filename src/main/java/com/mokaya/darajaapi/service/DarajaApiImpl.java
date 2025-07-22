@@ -202,6 +202,7 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
         TransactionStatusRequest transactionStatusRequest = new TransactionStatusRequest();
 
         transactionStatusRequest.setCommandID(TRANSACTION_STATUS_QUERY_COMMAND);
+        transactionStatusRequest.setInitiator(mpesaConfiguration.getB2cInitiatorName());
         transactionStatusRequest.setTransactionID(internalTransactionStatusRequest.getTransactionID());
         transactionStatusRequest.setPartyA(mpesaConfiguration.getShortCode());
         transactionStatusRequest.setIdentifierType(SHORT_CODE_IDENTIFIER);
