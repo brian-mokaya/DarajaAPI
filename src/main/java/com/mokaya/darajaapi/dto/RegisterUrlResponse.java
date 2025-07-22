@@ -13,12 +13,15 @@ public class RegisterUrlResponse {
     @JsonProperty("conversationId")
     private String conversationId;
 
-    @JsonProperty("responseDescription")
+    @JsonProperty("ResponseDescription")
     private String responseDescription;
 
-    @JsonProperty("OriginatorConversationID")
-    private String originatorConversationId;
-    
+    @JsonProperty("OriginatorCoversationID")
+    private String originatorCoversationId;
+
+    @JsonProperty("ResponseCode")
+    private String responseCode;
+
     @JsonProperty("errorCode")
     private String errorCode;
     

@@ -194,4 +194,43 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
         }
 
     }
+
+    @Override
+    public TransactionStatusSyncResponse getTransactionStatus(InternalTransactionStatusRequest internalTransactionStatusRequest) {
+
+        AccessTokenResponse accessTokenResponse = getAccessToken();
+        TransactionStatusRequest transactionStatusRequest = new TransactionStatusRequest();
+
+        transactionStatusRequest.setCommandID(TRANSACTION_STATUS_QUERY_COMMAND);
+        transactionStatusRequest.setTransactionID(internalTransactionStatusRequest.getTransactionID());
+        transactionStatusRequest.setPartyA(mpesaConfiguration.getShortCode());
+        transactionStatusRequest.setIdentifierType(SHORT_CODE_IDENTIFIER);
+        transactionStatusRequest.setRemarks(TRANSACTION_STATUS_VALUE);
+        transactionStatusRequest.setOccasion(TRANSACTION_STATUS_VALUE);
+        transactionStatusRequest.setQueueTimeOutURL(mpesaConfiguration.getB2cQueueTimeoutUrl());
+        transactionStatusRequest.setResultURL(mpesaConfiguration.getB2cResultUrl());
+        transactionStatusRequest.setSecurityCredential(HelperUtility.getSecurityCredentials(mpesaConfiguration.getB2cInitiatorPassword()));
+
+        RequestBody requestBody = RequestBody.create(JSON_MEDIA_TYPE, Objects.requireNonNull(HelperUtility.toJson(transactionStatusRequest)));
+        Request request = new Request.Builder()
+                .url(mpesaConfiguration.getTransactionResultUrl())
+                .post(requestBody)
+                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s%s", BEARER_AUTH_STRING, accessTokenResponse.getAccessToken()))
+                .addHeader(CACHE_CONTROL_HEADER, CACHE_CONTROL_HEADER_VALUE)
+                .addHeader(USER_AGENT_HEADER, USER_AGENT_VALUE)
+                .addHeader(ACCEPT_HEADER, ACCEPT_VALUE)
+                .addHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE_VALUE)
+                .build();
+
+        Response response = null;
+        try {
+            response = okHttpClient.newCall(request).execute();
+            assert response.body() != null;
+            return objectMapper .readValue(response.body().string(), TransactionStatusSyncResponse.class);
+
+        } catch (IOException e) {
+            log.error("Error while fetching transaction status: {}", e.getMessage());
+            throw new RuntimeException("Failed to fetch transaction status", e);
+        }
     }
+}

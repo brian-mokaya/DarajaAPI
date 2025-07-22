@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class ReferenceData{
+public class TransactionStatusAsyncResponse{
 
-	@JsonProperty("ReferenceItem")
-	private ReferenceItem referenceItem;
+	@JsonProperty("Result")
+	private Result result;
 }

@@ -8,7 +8,7 @@ public interface DarajaApi {
      * * Retrieves an access token from the Daraja API.
      *
      * @return AccessTokenResponse containing the access token and its expiration time.
-    */
+     */
     AccessTokenResponse getAccessToken();
 
 
@@ -36,4 +36,15 @@ public interface DarajaApi {
      * @return B2CTransactionSyncResponse containing the result of the B2C transaction.
      */
     B2CTransactionSyncResponse performB2CTransaction(InternalB2CTransactionRequest internalB2CTransactionRequest);
+
+
+    /**
+     * Retrieves the status of a transaction.
+     *
+     * @param internalTransactionStatusRequest The request object containing the transaction ID.
+     * @return InternalTransactionStatusResponse containing the status of the transaction.
+     */
+
+    TransactionStatusSyncResponse getTransactionStatus(InternalTransactionStatusRequest internalTransactionStatusRequest);
+
 }

@@ -13,6 +13,9 @@ public class RegisterUrlRequest {
     @JsonProperty("ResponseType")
     private String responseType;
 
+    @JsonProperty("OriginatorCoversationID")
+    private String OriginatorCoversationID;
+
     @JsonProperty("ConfirmationURL")
     private String confirmationUrl;
 

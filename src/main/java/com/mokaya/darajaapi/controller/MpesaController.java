@@ -6,10 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokaya.darajaapi.dto.*;
 import com.mokaya.darajaapi.service.DarajaApiImpl;
-import jakarta.websocket.Endpoint;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,20 +35,12 @@ public class MpesaController {
         return ResponseEntity.ok(darajaApi.registerUrl());
     }
 
-    @PostMapping(path = "/validation", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE }, produces = "application/json")
-    public ResponseEntity<AcknowledgeResponse> validateTransaction(@RequestBody String rawBody) {
-        System.out.println("✅ Raw transaction received: " + rawBody);
 
-        try {
-            TransactionResults transaction = objectMapper.readValue(rawBody, TransactionResults.class);
-            System.out.println("✅ Parsed Transaction: " + transaction);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-
+    @PostMapping(path = "/validation", produces = "application/json")
+    public ResponseEntity<AcknowledgeResponse> mpesaValidation(@RequestBody MpesaValidationResponse mpesaValidationResponse) {
         return ResponseEntity.ok(acknowledgeResponse);
     }
+
 
 
     @PostMapping(path = "/simulate-transaction", produces = "application/json")
@@ -63,7 +52,7 @@ public class MpesaController {
 
     // === B2C Transaction Region ====
 
-    @GetMapping(path = "/b2c-transaction-result", produces = "application/json")
+    @PostMapping(path = "/transaction-result", produces = "application/json")
     public ResponseEntity<AcknowledgeResponse> b2cTransactionAsyncResults(@RequestBody B2CTransactionAsyncResponse b2CTransactionAsyncResponse) {
         System.out.println("B2C Transaction Async Results: " + b2CTransactionAsyncResponse);
 
@@ -79,7 +68,7 @@ public class MpesaController {
     }
 
 
-    @PostMapping(path = "/b2c-queue-timeout", produces = "application/json")
+    @PostMapping(path = "/queue-timeout", produces = "application/json")
     public ResponseEntity<AcknowledgeResponse> queueTimeout(@RequestBody Object object) {
         return ResponseEntity.ok(acknowledgeResponse);
     }
@@ -87,6 +76,11 @@ public class MpesaController {
     @PostMapping(path = "/b2c-transaction", produces = "application/json")
     public ResponseEntity<B2CTransactionSyncResponse> performB2CTransaction(@RequestBody InternalB2CTransactionRequest internalB2CTransactionRequest) {
         return ResponseEntity.ok(darajaApi.performB2CTransaction(internalB2CTransactionRequest));
+    }
+
+    @PostMapping(path = "/transaction-status", produces = "application/json")
+    public ResponseEntity<TransactionStatusSyncResponse> getTransactionStatus(@RequestBody InternalTransactionStatusRequest internalTransactionStatusRequest) {
+        return ResponseEntity.ok(darajaApi.getTransactionStatus(internalTransactionStatusRequest));
     }
 
 
