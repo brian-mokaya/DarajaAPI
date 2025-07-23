@@ -22,5 +22,6 @@ public class Constants {
     public static final String MSISDN_IDENTIFIER = "1";
     public static final String TILL_NUMBER_IDENTIFIER = "2";
     public static final String SHORT_CODE_IDENTIFIER = "4";
+    public static final String ACCOUNT_BALANCE_COMMAND = "AccountBalance";
 
 }

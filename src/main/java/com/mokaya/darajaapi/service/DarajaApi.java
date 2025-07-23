@@ -33,9 +33,9 @@ public interface DarajaApi {
      * Performs a B2C transaction.
      *
      * @param internalB2CTransactionRequest The request object containing details for the B2C transaction.
-     * @return B2CTransactionSyncResponse containing the result of the B2C transaction.
+     * @return CommonTransactionSyncResponse containing the result of the B2C transaction.
      */
-    B2CTransactionSyncResponse performB2CTransaction(InternalB2CTransactionRequest internalB2CTransactionRequest);
+    CommonTransactionSyncResponse performB2CTransaction(InternalB2CTransactionRequest internalB2CTransactionRequest);
 
 
     /**
@@ -46,5 +46,12 @@ public interface DarajaApi {
      */
 
     TransactionStatusSyncResponse getTransactionStatus(InternalTransactionStatusRequest internalTransactionStatusRequest);
+
+    /**
+     * Checks the account balance.
+     *
+     * @return CommonTransactionSyncResponse containing the account balance information.
+     */
+    CommonTransactionSyncResponse checkAccountBalance();
 
 }

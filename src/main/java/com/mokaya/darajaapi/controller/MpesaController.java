@@ -74,13 +74,18 @@ public class MpesaController {
     }
 
     @PostMapping(path = "/b2c-transaction", produces = "application/json")
-    public ResponseEntity<B2CTransactionSyncResponse> performB2CTransaction(@RequestBody InternalB2CTransactionRequest internalB2CTransactionRequest) {
+    public ResponseEntity<CommonTransactionSyncResponse> performB2CTransaction(@RequestBody InternalB2CTransactionRequest internalB2CTransactionRequest) {
         return ResponseEntity.ok(darajaApi.performB2CTransaction(internalB2CTransactionRequest));
     }
 
     @PostMapping(path = "/transaction-status", produces = "application/json")
     public ResponseEntity<TransactionStatusSyncResponse> getTransactionStatus(@RequestBody InternalTransactionStatusRequest internalTransactionStatusRequest) {
         return ResponseEntity.ok(darajaApi.getTransactionStatus(internalTransactionStatusRequest));
+    }
+
+    @GetMapping(path = "/check-balance", produces = "application/json")
+    public ResponseEntity<CommonTransactionSyncResponse> checkBalance() {
+        return ResponseEntity.ok(darajaApi.checkAccountBalance());
     }
 
 

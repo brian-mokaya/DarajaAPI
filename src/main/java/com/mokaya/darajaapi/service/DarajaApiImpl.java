@@ -145,10 +145,10 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
     }
 
     @Override
-    public B2CTransactionSyncResponse performB2CTransaction(InternalB2CTransactionRequest internalB2CTransactionRequest) {
+    public CommonTransactionSyncResponse performB2CTransaction(InternalB2CTransactionRequest internalB2CTransactionRequest) {
 
     AccessTokenResponse accessTokenResponse = getAccessToken();
-    log.info(String.format("Access Token: %s", accessTokenResponse.getAccessToken()));
+    log.info("Access Token: {}", accessTokenResponse.getAccessToken());
 
     B2CTransactionRequest b2CTransactionRequest = new B2CTransactionRequest();
 
@@ -161,7 +161,7 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
     // get the Security credentials
     b2CTransactionRequest.setSecurityCredential(HelperUtility.getSecurityCredentials(mpesaConfiguration.getB2cInitiatorPassword()));
 
-    log.info("Security Creds: {}", b2CTransactionRequest.getSecurityCredential());
+    log.info("Security Credentials: {}", b2CTransactionRequest.getSecurityCredential());
 
     // set the result url ...
         b2CTransactionRequest.setResultURL(mpesaConfiguration.getB2cResultUrl());
@@ -187,7 +187,7 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
 
             assert response.body() != null;
 
-            return objectMapper.readValue(response.body().string(), B2CTransactionSyncResponse.class);
+            return objectMapper.readValue(response.body().string(), CommonTransactionSyncResponse.class);
         } catch (IOException e) {
             log.error("Could not perform B2C transaction ->{}", e.getLocalizedMessage());
             return null;
@@ -203,7 +203,16 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
 
         transactionStatusRequest.setCommandID(TRANSACTION_STATUS_QUERY_COMMAND);
         transactionStatusRequest.setInitiator(mpesaConfiguration.getB2cInitiatorName());
-        transactionStatusRequest.setTransactionID(internalTransactionStatusRequest.getTransactionID());
+
+        String transactionID = internalTransactionStatusRequest.getTransactionID();
+        log.info("Transaction ID received: {}", transactionID);
+
+        if (transactionID == null || transactionID.isBlank()) {
+            throw new IllegalArgumentException("TransactionID must not be null or empty");
+        }
+
+        transactionStatusRequest.setTransactionID(transactionID);
+        transactionStatusRequest.setOriginatorConversationID(internalTransactionStatusRequest.getOriginalConversationID());
         transactionStatusRequest.setPartyA(mpesaConfiguration.getShortCode());
         transactionStatusRequest.setIdentifierType(SHORT_CODE_IDENTIFIER);
         transactionStatusRequest.setRemarks(TRANSACTION_STATUS_VALUE);
@@ -212,6 +221,8 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
         transactionStatusRequest.setResultURL(mpesaConfiguration.getB2cResultUrl());
         transactionStatusRequest.setSecurityCredential(HelperUtility.getSecurityCredentials(mpesaConfiguration.getB2cInitiatorPassword()));
 
+        String payload = HelperUtility.toJson(transactionStatusRequest);
+        log.info("Transaction Status request payload: {}", payload);
         RequestBody requestBody = RequestBody.create(JSON_MEDIA_TYPE, Objects.requireNonNull(HelperUtility.toJson(transactionStatusRequest)));
         Request request = new Request.Builder()
                 .url(mpesaConfiguration.getTransactionResultUrl())
@@ -233,5 +244,43 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
             log.error("Error while fetching transaction status: {}", e.getMessage());
             throw new RuntimeException("Failed to fetch transaction status", e);
         }
+    }
+
+    @Override
+    public CommonTransactionSyncResponse checkAccountBalance() {
+    AccessTokenResponse accessTokenResponse = getAccessToken();
+    AccountBalanceRequest accountBalanceRequest = new AccountBalanceRequest();
+
+    accountBalanceRequest.setIdentifierType(SHORT_CODE_IDENTIFIER);
+    accountBalanceRequest.setPartyA(mpesaConfiguration.getShortCode());
+    accountBalanceRequest.setInitiator(mpesaConfiguration.getB2cInitiatorName());
+    accountBalanceRequest.setSecurityCredential(HelperUtility.getSecurityCredentials(mpesaConfiguration.getB2cInitiatorPassword()));
+    accountBalanceRequest.setCommandID(ACCOUNT_BALANCE_COMMAND);
+    accountBalanceRequest.setQueueTimeOutURL(mpesaConfiguration.getB2cQueueTimeoutUrl());
+    accountBalanceRequest.setResultURL(mpesaConfiguration.getB2cResultUrl());
+    accountBalanceRequest.setRemarks("Account Balance Check");
+
+    RequestBody requestBody = RequestBody.create(JSON_MEDIA_TYPE, Objects.requireNonNull(HelperUtility.toJson(accountBalanceRequest)));
+
+    Request request = new Request.Builder()
+            .url(mpesaConfiguration.getCheckAccountBalanceUrl())
+            .post(requestBody)
+            .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s%s", BEARER_AUTH_STRING, accessTokenResponse.getAccessToken()))
+            .addHeader(CACHE_CONTROL_HEADER, CACHE_CONTROL_HEADER_VALUE)
+            .addHeader(USER_AGENT_HEADER, USER_AGENT_VALUE)
+            .addHeader(ACCEPT_HEADER, ACCEPT_VALUE)
+            .addHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE_VALUE)
+            .build();
+
+        Response response = null;
+
+        try {
+            response = okHttpClient.newCall(request).execute();
+            assert response.body() != null;
+            return objectMapper .readValue(response.body().string(), CommonTransactionSyncResponse.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }

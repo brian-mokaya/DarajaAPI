@@ -8,4 +8,7 @@ import lombok.Data;
 public class InternalTransactionStatusRequest {
     @JsonProperty("TransactionID")
     private String transactionID;
+
+    @JsonProperty("OriginalConversationID")
+    private String originalConversationID;
 }
