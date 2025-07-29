@@ -2,7 +2,6 @@ package com.mokaya.darajaapi.constants;
 
 import com.squareup.okhttp.MediaType;
 
-import java.awt.*;
 
 public class Constants {
     public static final String BASIC_AUTH_STRING = "Basic ";
@@ -23,5 +22,7 @@ public class Constants {
     public static final String TILL_NUMBER_IDENTIFIER = "2";
     public static final String SHORT_CODE_IDENTIFIER = "4";
     public static final String ACCOUNT_BALANCE_COMMAND = "AccountBalance";
+    public static final String CUSTOMER_PAYBILL_ONLINE = "CustomerPayBillOnline";
+
 
 }

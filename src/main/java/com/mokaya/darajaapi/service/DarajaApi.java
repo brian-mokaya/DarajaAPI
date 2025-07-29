@@ -54,4 +54,13 @@ public interface DarajaApi {
      */
     CommonTransactionSyncResponse checkAccountBalance();
 
+    /**
+     * Performs a STK push transaction.
+     *
+     * @param internalStkPushRequest The request object containing details for the STK push transaction.
+     * @return CommonTransactionSyncResponse containing the result of the STK push transaction.
+     */
+
+    StkPushSyncResponse performStkPushTransaction(InternalStkPushRequest internalStkPushRequest);
+
 }

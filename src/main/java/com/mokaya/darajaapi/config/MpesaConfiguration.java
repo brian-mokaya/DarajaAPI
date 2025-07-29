@@ -26,6 +26,10 @@ public class MpesaConfiguration {
     private String b2cInitiatorPassword;
     private String transactionResultUrl;
     private  String CheckAccountBalanceUrl;
+    private String stkCallBackURL;
+    private String stkPassKey;
+    private String stkPushShortCode;
+    private String stkPushRequestUrl;
 
     @Override
     public String toString() {
@@ -35,9 +39,6 @@ public class MpesaConfiguration {
                 ", oauthUrl='" + oauthEndpoint + '\'' +
                 ", grantType='" + grantType + '\'' +
                 ", shortCode='" + shortCode + '\'' +
-                ", validationUrl='" + validationUrl + '\'' +
-                ", confirmationUrl='" + confirmationUrl + '\'' +
-                ", responseType='" + responseType + '\'' +
                 '}';
     }
 }

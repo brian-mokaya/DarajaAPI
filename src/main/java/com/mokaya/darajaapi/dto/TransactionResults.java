@@ -1,7 +1,6 @@
 package com.mokaya.darajaapi.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mongodb.internal.IgnorableRequestContext;
 import lombok.Data;
 
 @Data

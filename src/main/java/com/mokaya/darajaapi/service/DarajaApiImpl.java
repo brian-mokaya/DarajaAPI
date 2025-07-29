@@ -5,6 +5,7 @@ import static com.mokaya.darajaapi.constants.Constants.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokaya.darajaapi.config.MpesaConfiguration;
+import com.mokaya.darajaapi.constants.Constants;
 import com.mokaya.darajaapi.dto.*;
 import com.mokaya.darajaapi.utils.HelperUtility;
 import com.squareup.okhttp.OkHttpClient;
@@ -280,6 +281,56 @@ public DarajaApiImpl(MpesaConfiguration mpesaConfiguration, OkHttpClient okHttpC
             return objectMapper .readValue(response.body().string(), CommonTransactionSyncResponse.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+
+    }
+
+    @Override
+    public StkPushSyncResponse performStkPushTransaction(InternalStkPushRequest internalStkPushRequest) {
+
+        StkPushRequest stkPushRequest = new StkPushRequest();
+        stkPushRequest.setBusinessShortCode(mpesaConfiguration.getStkPushShortCode());
+
+        String transactionTimestamp = HelperUtility.getTransactionTimestamp();
+        String stkPushPassword = HelperUtility.getStkPushPassword(mpesaConfiguration.getStkPushShortCode(),
+                mpesaConfiguration.getStkPassKey(), transactionTimestamp);
+
+        stkPushRequest.setPassword(stkPushPassword);
+        stkPushRequest.setTimestamp(transactionTimestamp);
+        stkPushRequest.setTransactionType(Constants.CUSTOMER_PAYBILL_ONLINE);
+        stkPushRequest.setAmount(internalStkPushRequest.getAmount());
+        stkPushRequest.setPartyA(internalStkPushRequest.getPhoneNumber());
+        stkPushRequest.setPartyB(mpesaConfiguration.getStkPushShortCode());
+        stkPushRequest.setPhoneNumber(internalStkPushRequest.getPhoneNumber());
+        stkPushRequest.setCallBackURL(mpesaConfiguration.getStkCallBackURL());
+        stkPushRequest.setAccountReference(HelperUtility.getTransactionUniqueNumber());
+         stkPushRequest.setTransactionDesc(String.format("%s Transaction", internalStkPushRequest.getPhoneNumber()));
+
+        AccessTokenResponse accessTokenResponse = getAccessToken();
+
+        RequestBody body = RequestBody.create(JSON_MEDIA_TYPE,
+                Objects.requireNonNull(HelperUtility.toJson(stkPushRequest)));
+
+        Request request = new Request.Builder()
+                .url(mpesaConfiguration.getStkPushRequestUrl())
+                .post(body)
+                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s %s", BEARER_AUTH_STRING, accessTokenResponse.getAccessToken()))
+                .addHeader(CACHE_CONTROL_HEADER, CACHE_CONTROL_HEADER_VALUE)
+                .addHeader(USER_AGENT_HEADER, USER_AGENT_VALUE)
+                .addHeader(ACCEPT_HEADER, ACCEPT_VALUE)
+                .addHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE_VALUE)
+                .build();
+
+
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+            assert response.body() != null;
+            // use Jackson to Decode the ResponseBody ...
+
+            return objectMapper.readValue(response.body().string(), StkPushSyncResponse.class);
+        } catch (IOException e) {
+            log.error("Could not perform the STK push request -> {}", e.getLocalizedMessage());
+            return null;
         }
 
     }

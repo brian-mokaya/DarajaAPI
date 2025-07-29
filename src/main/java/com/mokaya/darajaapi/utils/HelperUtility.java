@@ -1,15 +1,16 @@
 package com.mokaya.darajaapi.utils;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-//import org.bson.internal.Base64;
+import org.apache.commons.text.CharacterPredicates;
+import org.apache.commons.text.RandomStringGenerator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import javax.crypto.BadPaddingException;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -19,6 +20,9 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Date;
+
+import static org.bouncycastle.util.encoders.Base64.toBase64String;
 
 /*
     * This utility class that contains a set of helper methods.
@@ -62,7 +66,10 @@ public class HelperUtility {
             byte[] input = initiatorPassword.getBytes();
 
             Resource resource = new ClassPathResource("SandboxCertificate.cer");
-            InputStream inputStream = resource.getInputStream();
+            if (!resource.exists()) {
+                log.error("Certificate file not found in classpath: SandboxCertificate.cer");
+                throw new FileNotFoundException("Certificate file not found in classpath: SandboxCertificate.cer");
+            }
 
             FileInputStream fin = new FileInputStream(resource.getFile());
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
@@ -81,9 +88,34 @@ public class HelperUtility {
             log.error("Error generating security credentials ->{}", e.getLocalizedMessage());
             throw e;
         } catch (IOException e) {
-            e.printStackTrace();
-            throw e;
+            log.error("Error reading certificate file: {}", e.getMessage());
+            throw new RuntimeException("Error reading certificate file", e);
+        } catch (Exception e) {
+            log.error("Unexpected error: {}", e.getMessage());
+            throw new RuntimeException("Unexpected error occurred", e);
         }
 
+    }
+
+    public static String getTransactionUniqueNumber() {
+        RandomStringGenerator generator = new RandomStringGenerator.Builder()
+                .withinRange('0', 'z')
+                .filteredBy(CharacterPredicates.LETTERS, CharacterPredicates.DIGITS)
+                .build();
+
+        String transactionNumber = generator.generate(12);
+        log.info("Transaction Number: {}", transactionNumber);
+        return transactionNumber.toUpperCase();
+
+    }
+
+    public static String getStkPushPassword(String shortCode, String passKey, String timestamp) {
+        String concatenatedString = String.format("%s%s%s", shortCode, passKey, timestamp);
+        return toBase64String(concatenatedString.getBytes());
+    }
+
+    public static String getTransactionTimestamp() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        return dateFormat.format(new Date());
     }
 }
